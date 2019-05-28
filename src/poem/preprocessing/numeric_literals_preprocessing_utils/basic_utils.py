@@ -28,5 +28,9 @@ def create_matix_of_literals(numeric_triples: np.array, entity_to_id: Dict) -> n
         except KeyError:
             log.info("Either entity or relation to literal doesn't exist.")
             continue
+    literals_to_id: Dict[bytes, int] = {
+        value.tobytes(): key
+        for key, value in enumerate(num_literals)
+    }
 
-    return num_literals
+    return num_literals, literals_to_id
