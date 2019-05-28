@@ -46,8 +46,10 @@ class CWATrainingLoop(TrainingLoop):
         _tqdm_kwargs = dict(desc='Training epoch')
 
         log.info(f'****running model on {self.kge_model.device}****')
+        previous_loss = None
 
-        for _ in trange(num_epochs, **_tqdm_kwargs):
+        trange_bar = trange(num_epochs, **_tqdm_kwargs)
+        for _ in trange_bar:
             indices = np.arange(num_triples)
             np.random.shuffle(indices)
             subject_relation_pairs = subject_relation_pairs[indices]
@@ -71,7 +73,10 @@ class CWATrainingLoop(TrainingLoop):
                 self.optimizer.step()
 
             # Track epoch loss
-            self.losses_per_epochs.append(current_epoch_loss / len(subject_relation_pairs))
+            loss_value = current_epoch_loss / len(subject_relation_pairs)
+            self.losses_per_epochs.append(loss_value)
+            trange_bar.set_postfix(loss=loss_value, previous_loss=previous_loss)
+            previous_loss = loss_value
 
         stop_training = timeit.default_timer()
         log.debug("training took %.2fs seconds", stop_training - start_training)
